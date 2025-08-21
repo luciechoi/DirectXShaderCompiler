@@ -23,7 +23,7 @@
 # Dump files from test crashes.
 *.dmp
 # Visual Studio Code directory.
-.vscode
+# .vscode
 # Visual Studio
 .vs/
 # Test outputs
