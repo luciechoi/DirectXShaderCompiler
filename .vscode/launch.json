@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "spirv-opt: CCP Pass",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/external/SPIRV-Tools/build/tools/spirv-opt",
+      "args": [
+        "${workspaceFolder}/issues/assembly.spv",
+        "-o",
+        "${workspaceFolder}/issues/1pass-out.spv",
+        "--ccp"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false
+    }
+  ]
+}

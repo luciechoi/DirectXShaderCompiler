@@ -1,0 +1,62 @@
+; IR before pass ccp
+OpCapability MinLod
+OpCapability StorageImageWriteWithoutFormat
+OpCapability StorageImageReadWithoutFormat
+OpCapability FragmentShaderSampleInterlockEXT
+OpCapability FragmentShaderPixelInterlockEXT
+OpCapability FragmentShaderShadingRateInterlockEXT
+OpCapability ComputeDerivativeGroupQuadsKHR
+OpCapability ComputeDerivativeGroupLinearKHR
+OpCapability RayQueryKHR
+OpCapability GroupNonUniformPartitionedNV
+OpCapability InterpolationFunction
+OpCapability QuadControlKHR
+OpCapability Shader
+OpCapability Int16
+OpCapability StorageBuffer16BitAccess
+OpExtension "SPV_EXT_fragment_shader_interlock"
+OpExtension "SPV_KHR_compute_shader_derivatives"
+OpExtension "SPV_KHR_ray_query"
+OpExtension "SPV_NV_shader_subgroup_partitioned"
+OpExtension "SPV_KHR_quad_control"
+%1 = OpExtInstImport "GLSL.std.450"
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %main "main" %Out0
+OpExecutionMode %main LocalSize 1 1 1
+OpSource HLSL 650
+OpName %type_RWStructuredBuffer_v4short "type.RWStructuredBuffer.v4short"
+OpName %Out0 "Out0"
+OpName %main "main"
+OpDecorate %Out0 DescriptorSet 0
+OpDecorate %Out0 Binding 4
+OpDecorate %_runtimearr_v4short ArrayStride 8
+OpMemberDecorate %type_RWStructuredBuffer_v4short 0 Offset 0
+OpDecorate %type_RWStructuredBuffer_v4short Block
+%short = OpTypeInt 16 1
+%short_0 = OpConstant %short 0
+%short_10 = OpConstant %short 10
+%short_10000 = OpConstant %short 10000
+%v4short = OpTypeVector %short 4
+%9 = OpConstantComposite %v4short %short_0 %short_0 %short_10 %short_10000
+%short_256 = OpConstant %short 256
+%short_4 = OpConstant %short 4
+%short_10001 = OpConstant %short 10001
+%13 = OpConstantComposite %v4short %short_0 %short_256 %short_4 %short_10001
+%int = OpTypeInt 32 1
+%int_0 = OpConstant %int 0
+%uint = OpTypeInt 32 0
+%uint_3 = OpConstant %uint 3
+%_runtimearr_v4short = OpTypeRuntimeArray %v4short
+%type_RWStructuredBuffer_v4short = OpTypeStruct %_runtimearr_v4short
+%_ptr_StorageBuffer_type_RWStructuredBuffer_v4short = OpTypePointer StorageBuffer %type_RWStructuredBuffer_v4short
+%void = OpTypeVoid
+%22 = OpTypeFunction %void
+%_ptr_StorageBuffer_v4short = OpTypePointer StorageBuffer %v4short
+%Out0 = OpVariable %_ptr_StorageBuffer_type_RWStructuredBuffer_v4short StorageBuffer
+%main = OpFunction %void None %22
+%23 = OpLabel
+%31 = OpExtInst %v4short %1 SMin %9 %13
+%32 = OpAccessChain %_ptr_StorageBuffer_v4short %Out0 %int_0 %uint_3
+OpStore %32 %31
+OpReturn
+OpFunctionEnd
