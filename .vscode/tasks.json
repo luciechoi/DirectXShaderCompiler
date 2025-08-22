@@ -2,30 +2,42 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "CMake: configure (Ninja, Debug)",
+      "label": "delete build",
+      "type": "shell",
+      "command": "rm",
+      "args": [
+        "-rf",
+        "${workspaceFolder}/external/SPIRV-Tools/build"
+      ]
+    },
+    {
+      "label": "generate build",
       "type": "shell",
       "command": "cmake",
       "args": [
+        "-S", "${workspaceFolder}/external/SPIRV-Tools",
         "-G", "Ninja",
-        "-B", "${workspaceFolder}/external/SPIRV-Tools/build",
+        "-B", "${workspaceFolder}/external/SPIRV-Tools/build/",
         "-DCMAKE_BUILD_TYPE=Debug"
       ],
+    },
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build", "${workspaceFolder}/external/SPIRV-Tools/build/.",
+        "--config", "Debug"
+      ],
+    },
+    {
+      "label": "CMake: BUILD (Debug)",
+      "dependsOn": ["delete build", "generate build", "build"],
+      "dependsOrder": "sequence",
       "group": {
         "kind": "build",
         "isDefault": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "CMake: build (Debug)",
-      "type": "shell",
-      "command": "cmake",
-      "args": [
-        "--build", "build",
-        "--config", "Debug"
-      ],
-      "group": "build",
-      "problemMatcher": []
+      }
     }
   ]
 }
