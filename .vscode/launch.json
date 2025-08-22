@@ -1,16 +1,33 @@
 {
   "version": "0.2.0",
   "configurations": [
+    // {
+    //   "name": "spirv-opt: CCP Pass",
+    //   "type": "cppdbg",
+    //   "request": "launch",
+    //   "program": "${workspaceFolder}/external/SPIRV-Tools/build/tools/spirv-opt",
+    //   "args": [
+    //     "${workspaceFolder}/issues/assembly.spv",
+    //     "-o",
+    //     "${workspaceFolder}/issues/1pass-out.spv",
+    //     "--ccp"
+    //   ],
+    //   "cwd": "${workspaceFolder}",
+    //   "stopAtEntry": false
+    // }
     {
-      "name": "spirv-opt: CCP Pass",
+      "name": "Run DXC",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/external/SPIRV-Tools/build/tools/spirv-opt",
+      "program": "${workspaceFolder}/build/bin/dxc",
       "args": [
-        "${workspaceFolder}/issues/assembly.spv",
-        "-o",
-        "${workspaceFolder}/issues/1pass-out.spv",
-        "--ccp"
+        "${workspaceFolder}/issues/7512/simple.hlsl",
+        "-spirv",
+        "-fspv-target-env=vulkan1.3",
+        "-enable-16bit-types",
+        "-T",
+        "cs_6_5",
+        "-fcgl",
       ],
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false
