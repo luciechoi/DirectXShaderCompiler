@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "delete build",
+      "type": "shell",
+      "command": "rm",
+      "args": [
+        "-rf",
+        "~/DirectXShaderCompiler/build/"
+      ]
+    },
+    {
+      "label": "generate build dxc",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "-B", "~/DirectXShaderCompiler/build/",
+        "-C", "cmake/caches/PredefinedParams.cmake",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-G", "Ninja",
+      ],
+    },
+    {
+      "label": "build dxc",
+      "type": "shell",
+      "command": "ninja",
+      "args": [
+        "-C", "~/DirectXShaderCompiler/build"
+      ],
+    },
+    {
+      "label": "CMake: BUILD (Debug)",
+      "dependsOn": ["delete build", "generate build dxc", "build dxc"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
