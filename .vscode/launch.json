@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run DXC",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "~/DirectXShaderCompiler/build/bin/dxc",
+      "args": [
+        "${input:shaderFile}",
+        "-spirv",
+        "-fspv-target-env=vulkan1.3",
+        "-enable-16bit-types",
+        "-T",
+        "cs_6_5",
+        "-fcgl",
+      ],
+      "cwd": ".",
+      "stopAtEntry": false
+    }
+  ],
+  // user input string
+  "inputs": [
+    {
+      "id": "shaderFile",
+      "type": "promptString",
+      "description": "Enter the path to the shader file",
+      "default": ""
+    }
+  ]
+}
