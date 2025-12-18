@@ -7,7 +7,7 @@
       "command": "rm",
       "args": [
         "-rf",
-        "~/DirectXShaderCompiler/build/"
+        "${workspaceFolder}/build/"
       ]
     },
     {
@@ -15,28 +15,54 @@
       "type": "shell",
       "command": "cmake",
       "args": [
-        "-B", "~/DirectXShaderCompiler/build/",
+        "-B", "${workspaceFolder}/build/",
         "-C", "cmake/caches/PredefinedParams.cmake",
         "-DCMAKE_BUILD_TYPE=Debug",
-        "-G", "Ninja",
-      ],
+        "-G", "Ninja"
+      ]
     },
     {
       "label": "build dxc",
       "type": "shell",
       "command": "ninja",
       "args": [
-        "-C", "~/DirectXShaderCompiler/build"
-      ],
+        "-C", "${workspaceFolder}/build"
+      ]
     },
     {
       "label": "CMake: BUILD (Debug)",
-      "dependsOn": ["delete build", "generate build dxc", "build dxc"],
+      "dependsOn": ["generate build dxc", "build dxc"],
       "dependsOrder": "sequence",
       "group": {
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "run dxc",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/bin/dxc",
+      "args": [
+        "${input:shaderFile}",
+        "-spirv",
+        "-fspv-target-env=vulkan1.3",
+        "-enable-16bit-types",
+        "-T",
+        "cs_6_5",
+        "-fcgl"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "shaderFile",
+      "type": "promptString",
+      "description": "Enter the path to the shader file",
+      "default": ""
     }
   ]
 }

@@ -5,7 +5,7 @@
       "name": "Run DXC",
       "type": "cppdbg",
       "request": "launch",
-      "program": "~/DirectXShaderCompiler/build/bin/dxc",
+      "program": "${workspaceFolder}/build/bin/dxc",
       "args": [
         "${input:shaderFile}",
         "-spirv",
@@ -13,7 +13,7 @@
         "-enable-16bit-types",
         "-T",
         "cs_6_5",
-        "-fcgl",
+        "-fcgl"
       ],
       "cwd": ".",
       "stopAtEntry": false
