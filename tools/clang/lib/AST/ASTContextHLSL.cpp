@@ -1369,13 +1369,15 @@ CXXRecordDecl *hlsl::DeclareNodeOrRecordType(
 }
 
 #ifdef ENABLE_SPIRV_CODEGEN
-CXXRecordDecl *hlsl::DeclareVkSampledTexture2DType(ASTContext &context,
-                                                   DeclContext *declContext,
-                                                   QualType float2Type) {
+CXXRecordDecl *hlsl::DeclareVkSampledTexture2DType(
+    ASTContext &context, DeclContext *declContext, QualType float2Type,
+    QualType defaultTextureType) {
+  // TODO(https://github.com/microsoft/DirectXShaderCompiler/issues/7979): Later
+  // generalize these to all SampledTexture types.
   BuiltinTypeDeclBuilder Builder(declContext, "SampledTexture2D",
                                  TagDecl::TagKind::TTK_Struct);
   TemplateTypeParmDecl *TyParamDecl =
-      Builder.addTypeTemplateParam("sampledtype");
+      Builder.addTypeTemplateParam("SampledTextureType", defaultTextureType);
 
   Builder.startDefinition();
 

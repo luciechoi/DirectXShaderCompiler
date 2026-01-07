@@ -4018,8 +4018,10 @@ private:
           continue;
         QualType float2Type =
             LookupVectorType(HLSLScalarType::HLSLScalarType_float, 2);
-        recordDecl =
-            DeclareVkSampledTexture2DType(*m_context, m_vkNSDecl, float2Type);
+        QualType float4Type =
+            LookupVectorType(HLSLScalarType::HLSLScalarType_float, 4);
+        recordDecl = DeclareVkSampledTexture2DType(*m_context, m_vkNSDecl,
+                                                   float2Type, float4Type);
         recordDecl->setImplicit(true);
         m_vkSampledTexture2DTemplateDecl = recordDecl->getDescribedClassTemplate();
       }
