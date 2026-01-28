@@ -1860,9 +1860,27 @@ static void AddSampleCmpLevelFunction(ASTContext &context,
   sampleDecl5->addAttr(HLSLCXXOverloadAttr::CreateImplicit(context));
 }
 
-static void AddGatherFunction(ASTContext &context, CXXRecordDecl *recordDecl,
-                              QualType returnType, QualType coordinateType,
+static void AddGatherFunction(ASTContext &context, Sema *S,
+                              CXXRecordDecl *recordDecl,
+                              ClassTemplateDecl *vectorTemplateDecl,
+                              QualType paramType, QualType coordinateType,
                               QualType offsetType) {
+  QualType elemType = paramType;
+  if (hlsl::IsHLSLVecType(paramType))
+    elemType = hlsl::GetHLSLVecElementType(paramType);
+  Expr *sizeExpr = IntegerLiteral::Create(
+      context, llvm::APInt(context.getTypeSize(context.IntTy), 4),
+      context.IntTy, SourceLocation());
+  TemplateArgumentListInfo templateArgsInfo;
+  templateArgsInfo.addArgument(TemplateArgumentLoc(
+      TemplateArgument(elemType), context.getTrivialTypeSourceInfo(elemType)));
+  templateArgsInfo.addArgument(TemplateArgumentLoc(
+      TemplateArgument(sizeExpr), TemplateArgumentLocInfo(sizeExpr)));
+  QualType returnType = S->CheckTemplateIdType(
+      TemplateName(vectorTemplateDecl), SourceLocation(), templateArgsInfo);
+  if (auto *returnDecl = returnType->getAsCXXRecordDecl())
+    returnType = context.getRecordType(returnDecl);
+
   // Gather(location)
   CXXMethodDecl *gatherDecl = CreateObjectFunctionDeclarationWithParams(
       context, recordDecl, returnType, ArrayRef<QualType>(coordinateType),
@@ -1897,6 +1915,76 @@ static void AddGatherFunction(ASTContext &context, CXXRecordDecl *recordDecl,
       context, "op", "", static_cast<int>(hlsl::IntrinsicOp::MOP_Gather)));
   gatherDecl3->addAttr(HLSLCXXOverloadAttr::CreateImplicit(context));
 }
+
+// static void AddGatherComponentsFunction(ASTContext &context, CXXRecordDecl
+// *recordDecl,
+//                               QualType paramType, QualType coordinateType,
+//                               QualType offsetType) {
+
+//     QualType elementType = context.getTemplateTypeParmType(
+//       /*templateDepth*/ 0, 0, ParameterPackFalse, elementTemplateParamDecl);
+//   TemplateTypeParmDecl *elementTemplateParamDecl =
+//       typeDeclBuilder.addTypeTemplateParam("element",
+//                                            (QualType)context.FloatTy);
+
+//   const char *componentFunctions[] = {"GatherRed", "GatherGreen",
+//   "GatherBlue", "GatherAlpha"}; const hlsl::IntrinsicOp componentOp[] = {
+//       hlsl::IntrinsicOp::MOP_GatherRed, hlsl::IntrinsicOp::MOP_GatherGreen,
+//       hlsl::IntrinsicOp::MOP_GatherBlue, hlsl::IntrinsicOp::MOP_GatherAlpha};
+
+//   for (int i = 0; i < 4; i++) {
+//     // GatherComponent(location, offset)
+//     QualType gatherParams2[] = {coordinateType, offsetType};
+//     StringRef gatherNames2[] = {"location", "offset"};
+//     CXXMethodDecl *gatherDecl2 = CreateObjectFunctionDeclarationWithParams(
+//         context, recordDecl, returnType, gatherParams2, gatherNames2,
+//         context.DeclarationNames.getIdentifier(&context.Idents.get(componentFunctions[i])),
+//         /*isConst*/ true);
+//     gatherDecl2->addAttr(HLSLIntrinsicAttr::CreateImplicit(
+//         context, "op", "", static_cast<int>(componentOp[i])));
+//     gatherDecl2->addAttr(HLSLCXXOverloadAttr::CreateImplicit(context));
+
+//     // GatherComponent(location, offset, status)
+//     QualType gatherParams3[] = {
+//         coordinateType, offsetType,
+//         context.getLValueReferenceType(context.UnsignedIntTy)};
+//     StringRef gatherNames3[] = {"location", "offset", "status"};
+//     CXXMethodDecl *gatherDecl3 = CreateObjectFunctionDeclarationWithParams(
+//         context, recordDecl, returnType, gatherParams3, gatherNames3,
+//         context.DeclarationNames.getIdentifier(&context.Idents.get(componentFunctions[i])),
+//         /*isConst*/ true);
+//     gatherDecl3->addAttr(HLSLIntrinsicAttr::CreateImplicit(
+//         context, "op", "", static_cast<int>(componentOp[i])));
+//     gatherDecl3->addAttr(HLSLCXXOverloadAttr::CreateImplicit(context));
+
+//     // GatherComponent(location, offset1, offset2, offset3, offset4)
+//     QualType gatherParams5[] = {
+//         coordinateType, offsetType, offsetType, offsetType, offsetType};
+//     StringRef gatherNames5[] = {"location", "offset1", "offset2", "offset3",
+//     "offset4"}; CXXMethodDecl *gatherDecl5 =
+//     CreateObjectFunctionDeclarationWithParams(
+//         context, recordDecl, returnType, gatherParams5, gatherNames5,
+//         context.DeclarationNames.getIdentifier(&context.Idents.get(componentFunctions[i])),
+//         /*isConst*/ true);
+//     gatherDecl5->addAttr(HLSLIntrinsicAttr::CreateImplicit(
+//         context, "op", "", static_cast<int>(componentOp[i])));
+//     gatherDecl5->addAttr(HLSLCXXOverloadAttr::CreateImplicit(context));
+
+//     // GatherComponent(location, offset1, offset2, offset3, offset4, status)
+//     QualType gatherParams6[] = {
+//         coordinateType, offsetType, offsetType, offsetType, offsetType,
+//         context.getLValueReferenceType(context.UnsignedIntTy)};
+//     StringRef gatherNames6[] = {"location", "offset1", "offset2", "offset3",
+//     "offset4", "status"}; CXXMethodDecl *gatherDecl6 =
+//     CreateObjectFunctionDeclarationWithParams(
+//         context, recordDecl, returnType, gatherParams6, gatherNames6,
+//         context.DeclarationNames.getIdentifier(&context.Idents.get(componentFunctions[i])),
+//         /*isConst*/ true);
+//     gatherDecl6->addAttr(HLSLIntrinsicAttr::CreateImplicit(
+//         context, "op", "", static_cast<int>(componentOp[i])));
+//     gatherDecl6->addAttr(HLSLCXXOverloadAttr::CreateImplicit(context));
+//   }
+// }
 
 static void AddGetDimensionsFunction(ASTContext &context,
                                      CXXRecordDecl *recordDecl,
@@ -2041,41 +2129,90 @@ static void AddLoadFunction(ASTContext &context, CXXRecordDecl *recordDecl,
 }
 
 CXXRecordDecl *hlsl::DeclareVkSampledTextureType(
-    ASTContext &context, DeclContext *declContext, llvm::StringRef hlslTypeName,
+    ASTContext &context, Sema *S, DeclContext *declContext,
+    ClassTemplateDecl *vecTemplateDecl, llvm::StringRef hlslTypeName,
     QualType defaultParamType, QualType coordinateType, QualType locationType,
     QualType offsetType, QualType rateOfChangeType) {
   BuiltinTypeDeclBuilder Builder(declContext, hlslTypeName,
                                  TagDecl::TagKind::TTK_Struct);
 
   TemplateTypeParmDecl *TyParamDecl =
-      Builder.addTypeTemplateParam("SampledTextureType", defaultParamType);
-
+      Builder.addTypeTemplateParam("recordtype", defaultParamType);
   Builder.startDefinition();
 
-  QualType paramType = QualType(TyParamDecl->getTypeForDecl(), 0);
+  (void)TyParamDecl;
   CXXRecordDecl *recordDecl = Builder.getRecordDecl();
 
-  AddSampleFunction(context, recordDecl, paramType, coordinateType, offsetType);
-  AddSampleBiasFunction(context, recordDecl, paramType, coordinateType,
-                        offsetType);
-  AddSampleLevelFunction(context, recordDecl, paramType, coordinateType,
-                         offsetType);
-  AddSampleGradFunction(context, recordDecl, paramType, coordinateType,
-                        offsetType, rateOfChangeType);
-  AddSampleCmpFunction(context, recordDecl, coordinateType, offsetType);
-  AddSampleCmpLevelZeroFunction(context, recordDecl, coordinateType,
-                                offsetType);
-  AddSampleCmpLevelFunction(context, recordDecl, coordinateType, offsetType);
-  AddSampleCmpGradFunction(context, recordDecl, coordinateType, offsetType,
-                           rateOfChangeType);
-  AddSampleCmpBiasFunction(context, recordDecl, coordinateType, offsetType);
-  AddCalculateLevelOfDetailFunction(context, recordDecl, coordinateType,
-                                    /*unclamped=*/false);
-  AddCalculateLevelOfDetailFunction(context, recordDecl, coordinateType,
-                                    /*unclamped=*/true);
-  AddGatherFunction(context, recordDecl, paramType, coordinateType, offsetType);
-  AddGetDimensionsFunction(context, recordDecl, coordinateType);
-  AddLoadFunction(context, recordDecl, paramType, locationType, offsetType);
+  // possible element types are float, int, uint, double
+  // possible size are 1, 2, 3, 4
+  // build possible param types
+  QualType paramTypes[] = {context.FloatTy, context.IntTy,
+                           context.UnsignedIntTy, context.DoubleTy};
+  std::vector<std::pair<QualType, QualType>> paramTypesVec;
+  for (const auto &type : paramTypes) {
+    paramTypesVec.push_back(std::make_pair(type, type));
+    for (int i = 0; i < 4; i++) {
+      Expr *sizeExpr = IntegerLiteral::Create(
+          context, llvm::APInt(context.getTypeSize(context.IntTy), i + 1),
+          context.IntTy, SourceLocation());
+      TemplateArgumentListInfo templateArgsInfo;
+      templateArgsInfo.addArgument(TemplateArgumentLoc(
+          TemplateArgument(type), context.getTrivialTypeSourceInfo(type)));
+      templateArgsInfo.addArgument(TemplateArgumentLoc(
+          TemplateArgument(sizeExpr), TemplateArgumentLocInfo(sizeExpr)));
+      QualType vectorType = S->CheckTemplateIdType(
+          TemplateName(vecTemplateDecl), SourceLocation(), templateArgsInfo);
+      paramTypesVec.push_back(std::make_pair(vectorType, type));
+    }
+  }
+  ClassTemplateDecl *templateDecl = Builder.getTemplateDecl();
+  for (const auto &pair : paramTypesVec) {
+    QualType paramType = pair.first;
+    QualType elemType = pair.second;
+
+    QualType canonicalParamType = paramType.getCanonicalType();
+    TemplateArgument templateArgs[1] = {TemplateArgument(canonicalParamType)};
+    void *insertPos = nullptr;
+    ClassTemplateSpecializationDecl *specDecl =
+        templateDecl->findSpecialization(templateArgs, insertPos);
+    if (!specDecl) {
+      specDecl = ClassTemplateSpecializationDecl::Create(
+          context, TagDecl::TagKind::TTK_Struct, declContext, NoLoc, NoLoc,
+          templateDecl, templateArgs, _countof(templateArgs), nullptr);
+      specDecl->setSpecializationKind(TSK_ExplicitSpecialization);
+      specDecl->setLexicalDeclContext(declContext);
+      specDecl->setImplicit(true);
+      declContext->addDecl(specDecl);
+      templateDecl->AddSpecialization(specDecl, insertPos);
+    }
+
+    specDecl->startDefinition();
+    AddSampleFunction(context, specDecl, paramType, coordinateType, offsetType);
+    AddSampleBiasFunction(context, specDecl, paramType, coordinateType,
+                          offsetType);
+    AddSampleLevelFunction(context, specDecl, paramType, coordinateType,
+                           offsetType);
+    AddSampleGradFunction(context, specDecl, paramType, coordinateType,
+                          offsetType, rateOfChangeType);
+    AddSampleCmpFunction(context, specDecl, coordinateType, offsetType);
+    AddSampleCmpLevelZeroFunction(context, specDecl, coordinateType,
+                                  offsetType);
+    AddSampleCmpLevelFunction(context, specDecl, coordinateType, offsetType);
+    AddSampleCmpGradFunction(context, specDecl, coordinateType, offsetType,
+                             rateOfChangeType);
+    AddSampleCmpBiasFunction(context, specDecl, coordinateType, offsetType);
+    AddCalculateLevelOfDetailFunction(context, specDecl, coordinateType,
+                                      /*unclamped=*/false);
+    AddCalculateLevelOfDetailFunction(context, specDecl, coordinateType,
+                                      /*unclamped=*/true);
+    AddGatherFunction(context, S, specDecl, vecTemplateDecl, paramType,
+                      coordinateType, offsetType);
+    //   AddGatherComponentsFunction(context, specDecl, paramType,
+    //   coordinateType, offsetType);
+    AddGetDimensionsFunction(context, specDecl, coordinateType);
+    AddLoadFunction(context, specDecl, paramType, locationType, offsetType);
+    specDecl->completeDefinition();
+  }
 
   Builder.completeDefinition();
   return recordDecl;

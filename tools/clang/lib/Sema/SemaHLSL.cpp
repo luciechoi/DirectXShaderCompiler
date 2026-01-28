@@ -4017,7 +4017,8 @@ private:
         if (!m_vkNSDecl)
           continue;
         recordDecl = DeclareVkSampledTextureType(
-            *m_context, m_vkNSDecl, "SampledTexture2D",
+            *m_context, m_sema, m_vkNSDecl, m_vectorTemplateDecl,
+            "SampledTexture2D",
             LookupVectorType(HLSLScalarType::HLSLScalarType_float, 4),
             LookupVectorType(HLSLScalarType::HLSLScalarType_float, 2),
             LookupVectorType(HLSLScalarType::HLSLScalarType_int, 3),
