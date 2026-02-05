@@ -1369,9 +1369,10 @@ CXXRecordDecl *hlsl::DeclareNodeOrRecordType(
 }
 
 #ifdef ENABLE_SPIRV_CODEGEN
-CXXRecordDecl *hlsl::DeclareVkSampledTexture2DType(
-    ASTContext &context, DeclContext *declContext, QualType float2Type,
-    QualType defaultTextureType) {
+CXXRecordDecl *
+hlsl::DeclareVkSampledTexture2DType(ASTContext &context,
+                                    DeclContext *declContext,
+                                    QualType defaultTextureType) {
   // TODO(https://github.com/microsoft/DirectXShaderCompiler/issues/7979): Later
   // generalize these to all SampledTexture types.
   BuiltinTypeDeclBuilder Builder(declContext, "SampledTexture2D",
@@ -1384,18 +1385,10 @@ CXXRecordDecl *hlsl::DeclareVkSampledTexture2DType(
   QualType paramType = QualType(TyParamDecl->getTypeForDecl(), 0);
   CXXRecordDecl *recordDecl = Builder.getRecordDecl();
 
-  // Add Sample method
-  // sampledtype Sample(float2 location)
-  CXXMethodDecl *sampleDecl = CreateObjectFunctionDeclarationWithParams(
-      context, recordDecl, paramType, ArrayRef<QualType>(float2Type),
-      ArrayRef<StringRef>(StringRef("location")),
-      context.DeclarationNames.getIdentifier(&context.Idents.get("Sample")),
-      /*isConst*/ true);
-  sampleDecl->addAttr(HLSLIntrinsicAttr::CreateImplicit(
-      context, "op", "",
-      static_cast<int>(hlsl::IntrinsicOp::MOP_Sample)));
+  if (auto *tmpl = recordDecl->getDescribedClassTemplate()) {
+    tmpl->setImplicit(true);
+  }
 
-  Builder.completeDefinition();
   return recordDecl;
 }
 

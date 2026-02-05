@@ -407,9 +407,10 @@ clang::CXXRecordDecl *
 DeclareVkBufferPointerType(clang::ASTContext &context,
                            clang::DeclContext *declContext);
 
-clang::CXXRecordDecl *DeclareVkSampledTexture2DType(
-    clang::ASTContext &context, clang::DeclContext *declContext,
-    clang::QualType float2Type, clang::QualType defaultTextureType);
+clang::CXXRecordDecl *
+DeclareVkSampledTexture2DType(clang::ASTContext &context,
+                              clang::DeclContext *declContext,
+                              clang::QualType defaultTextureType);
 
 clang::CXXRecordDecl *DeclareInlineSpirvType(clang::ASTContext &context,
                                              clang::DeclContext *declContext,

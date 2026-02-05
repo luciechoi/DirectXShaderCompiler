@@ -2448,6 +2448,12 @@ static void GetIntrinsicMethods(ArBasicKind kind,
     *intrinsics = g_RayQueryMethods;
     *intrinsicCount = _countof(g_RayQueryMethods);
     break;
+#ifdef ENABLE_SPIRV_CODEGEN
+  case AR_OBJECT_VK_SAMPLED_TEXTURE2D:
+    *intrinsics = g_VkSampledTexture2DMethods;
+    *intrinsicCount = _countof(g_VkSampledTexture2DMethods);
+    break;
+#endif
   case AR_OBJECT_HIT_OBJECT:
     *intrinsics = g_DxHitObjectMethods;
     *intrinsicCount = _countof(g_DxHitObjectMethods);
@@ -4016,14 +4022,14 @@ private:
       } else if (kind == AR_OBJECT_VK_SAMPLED_TEXTURE2D) {
         if (!m_vkNSDecl)
           continue;
-        QualType float2Type =
-            LookupVectorType(HLSLScalarType::HLSLScalarType_float, 2);
         QualType float4Type =
             LookupVectorType(HLSLScalarType::HLSLScalarType_float, 4);
-        recordDecl = DeclareVkSampledTexture2DType(*m_context, m_vkNSDecl,
-                                                   float2Type, float4Type);
+        recordDecl =
+            DeclareVkSampledTexture2DType(*m_context, m_vkNSDecl, float4Type);
         recordDecl->setImplicit(true);
         m_vkSampledTexture2DTemplateDecl = recordDecl->getDescribedClassTemplate();
+        if (m_vkSampledTexture2DTemplateDecl)
+          m_vkSampledTexture2DTemplateDecl->setImplicit(true);
       }
 #endif
       else if (templateArgCount == 0) {
